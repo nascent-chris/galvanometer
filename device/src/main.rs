@@ -67,7 +67,7 @@ fn main() -> ! {
     pwm.set_period(10.kHz());
 
     let max_pwm = pwm.get_max_duty();
-    hprint!("Max PWM: {}", max_pwm);
+    // hprint!("Max PWM: {}", max_pwm);
 
     // BluePill board has a pull-up resistor on the D+ line.
     // Pull the D+ pin down to send a RESET condition to the USB bus.
@@ -108,7 +108,7 @@ fn main() -> ! {
             Ok(count) if count > 0 => {
                 // decode first byte of buffer as a percentage
                 let desired_percentage = (buf[0] as f64 / 255.0) * 100.0;
-                hprintln!("Desired percentage: {}", desired_percentage);
+                //  hprintln!("Desired percentage: {}", desired_percentage);
                 let duty_cycle =
                     duty_cycle_from_desired_gauge_reading(desired_percentage * 3.0) as u16;
                 pwm.set_duty(Channel::C3, duty_cycle);
@@ -116,13 +116,7 @@ fn main() -> ! {
 
                 led.set_low(); // Turn on
 
-                // Echo back in upper case
-                // for c in buf[0..count].iter_mut() {
-                //     if 0x61 <= *c && *c <= 0x7a {
-                //         *c &= !0x20;
-                //     }
-                // }
-
+                // Echo back
                 let mut write_offset = 0;
                 while write_offset < count {
                     match serial.write(&buf[write_offset..count]) {
@@ -197,5 +191,8 @@ fn duty_cycle_from_desired_gauge_reading(actual_gauge_reading: f64) -> f64 {
     let b = 0.52171;
     let c = 35.98441;
 
+    // Because these values were determined empirically using an 8 MHz clock,
+    // we need to scale the result with the clock speed
+    // in this case, the clock speed is 72 MHz, so we multiply by 6.0
     ((a * actual_gauge_reading * actual_gauge_reading) + (b * actual_gauge_reading) + c) * 6.0
 }
