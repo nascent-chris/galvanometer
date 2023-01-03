@@ -1,1 +1,1 @@
-# galvonometer
+# galvanometer
